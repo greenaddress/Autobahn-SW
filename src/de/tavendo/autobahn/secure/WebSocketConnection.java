@@ -51,7 +51,7 @@ public class WebSocketConnection implements WebSocket {
 	private URI mWebSocketURI;
 	private String[] mWebSocketSubprotocols;
 
-	private WeakReference<WebSocket.WebSocketConnectionObserver> mWebSocketConnectionObserver;
+	private WebSocket.WebSocketConnectionObserver mWebSocketConnectionObserver;
 
 	protected WebSocketOptions mWebSocketOptions;
 	private boolean mPreviousConnection = false;
@@ -166,7 +166,7 @@ public class WebSocketConnection implements WebSocket {
 			}
 
 			this.mWebSocketSubprotocols = subprotocols;
-			this.mWebSocketConnectionObserver = new WeakReference<WebSocket.WebSocketConnectionObserver>(connectionObserver);
+			this.mWebSocketConnectionObserver = connectionObserver;
 			this.mWebSocketOptions = new WebSocketOptions(options);
 
 			connect();
@@ -279,7 +279,7 @@ public class WebSocketConnection implements WebSocket {
 			reconnecting = scheduleReconnect();
 		}
 
-		WebSocket.WebSocketConnectionObserver webSocketObserver = mWebSocketConnectionObserver.get();
+		WebSocket.WebSocketConnectionObserver webSocketObserver = mWebSocketConnectionObserver;
 		if (webSocketObserver != null) {
 			try {
 				if (reconnecting) {
@@ -339,7 +339,7 @@ public class WebSocketConnection implements WebSocket {
 	}
 
 	private void handleMessage(Message message) {
-		WebSocket.WebSocketConnectionObserver webSocketObserver = mWebSocketConnectionObserver.get();
+		WebSocket.WebSocketConnectionObserver webSocketObserver = mWebSocketConnectionObserver;
 
 		if (message.obj instanceof WebSocketMessage.TextMessage) {
 			WebSocketMessage.TextMessage textMessage = (WebSocketMessage.TextMessage) message.obj;
