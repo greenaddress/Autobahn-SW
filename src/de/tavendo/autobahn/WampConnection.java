@@ -28,6 +28,7 @@ import android.util.Log;
 import de.tavendo.autobahn.secure.WebSocketConnection;
 import de.tavendo.autobahn.secure.WebSocketConnectionHandler;
 import de.tavendo.autobahn.secure.WebSocketException;
+import de.tavendo.autobahn.secure.WebSocketMessage;
 
 public class WampConnection extends WebSocketConnection implements Wamp {
 
@@ -43,7 +44,7 @@ public class WampConnection extends WebSocketConnection implements Wamp {
 
    /// RNG for IDs.
    private final Random mRng = new Random();
-   
+
 
    /// Set of chars to be used for IDs.
    private static final char[] mBase64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
@@ -121,7 +122,7 @@ public class WampConnection extends WebSocketConnection implements Wamp {
 
       mWebSocketWriter = new WampWriter(mHandler, mSocket, mWebSocketOptions, "AutobahnWriter");
       mWebSocketWriter.start();
-      
+
       synchronized (mWebSocketWriter) {
 			try {
 				mWebSocketWriter.wait();
@@ -131,7 +132,7 @@ public class WampConnection extends WebSocketConnection implements Wamp {
       if (DEBUG) Log.d(TAG, "writer created and started");
    }
 
-   
+
    /**
     * Create the connection receiving leg reader.
     */
@@ -204,15 +205,15 @@ public class WampConnection extends WebSocketConnection implements Wamp {
 
       try {
          connect(URI.create(wsUri), new String[] {"wamp"}, new WebSocketConnectionObserver() {
-            
+
             @Override
             public void onTextMessage(String payload) {
             }
-            
+
             @Override
             public void onRawTextMessage(byte[] payload) {
             }
-            
+
             @Override
             public void onOpen() {
                if (mSessionHandler != null) {
@@ -221,7 +222,7 @@ public class WampConnection extends WebSocketConnection implements Wamp {
                   if (DEBUG) Log.d(TAG, "could not call onOpen() .. handler already NULL");
                }
             }
-            
+
             @Override
             public void onClose(WebSocketCloseNotification code, String reason) {
                if (mSessionHandler != null) {
@@ -229,12 +230,21 @@ public class WampConnection extends WebSocketConnection implements Wamp {
                } else {
                   if (DEBUG) Log.d(TAG, "could not call onClose() .. handler already NULL");
                }
-               
+
             }
-            
+
+            @Override
+            public void onCloseMessage(WebSocketMessage.Close close) {
+               if (mSessionHandler != null) {
+                  mSessionHandler.onCloseMessage(close);
+               } else {
+                  if (DEBUG) Log.d(TAG, "could not call onCloseMessage() .. handler already NULL");
+               }
+            }
+
             @Override
             public void onBinaryMessage(byte[] payload) {
-               
+
             }
          }, options);
 

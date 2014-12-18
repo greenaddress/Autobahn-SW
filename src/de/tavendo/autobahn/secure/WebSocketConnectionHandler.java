@@ -67,4 +67,11 @@ public class WebSocketConnectionHandler implements WebSocket.WebSocketConnection
    public void onBinaryMessage(byte[] payload) {
    }
 
+   /**
+    * Fired when a close message has been received.
+    *
+    * @param payload    Parsed close message
+    */
+   public void onCloseMessage(WebSocketMessage.Close close) {
+   }
 }

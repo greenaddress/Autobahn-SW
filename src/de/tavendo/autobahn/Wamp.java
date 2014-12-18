@@ -22,6 +22,7 @@ package de.tavendo.autobahn;
 import org.codehaus.jackson.type.TypeReference;
 
 import de.tavendo.autobahn.secure.WebSocket.WebSocketConnectionObserver.WebSocketCloseNotification;
+import de.tavendo.autobahn.secure.WebSocketMessage;
 
 /**
  * WAMP interface.
@@ -37,6 +38,8 @@ public interface Wamp {
        * Fired upon successful establishment of connection to WAMP server.
        */
       public void onOpen();
+
+      public void onCloseMessage(WebSocketMessage.Close close);
 
       /**
        * Firex upon unsuccessful connection attempt or when connection

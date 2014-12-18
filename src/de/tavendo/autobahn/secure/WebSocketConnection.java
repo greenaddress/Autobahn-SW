@@ -128,9 +128,9 @@ public class WebSocketConnection implements WebSocket {
 		} else {
 			Log.d(TAG, "mTransportChannel already NULL");
 		}
-		
+
 		mSocketThread.getHandler().post(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				Looper.myLooper().quit();
@@ -184,7 +184,7 @@ public class WebSocketConnection implements WebSocket {
 	}
 
 	/**
-	 * Reconnect to the server with the latest options 
+	 * Reconnect to the server with the latest options
 	 * @return true if reconnection performed
 	 */
 	public boolean reconnect() {
@@ -206,13 +206,13 @@ public class WebSocketConnection implements WebSocket {
 			}
 		}
 		mSocketThread.getHandler().post(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				mSocketThread.startConnection();
 			}
 		});
-		
+
 		synchronized (mSocketThread) {
 			try {
 				mSocketThread.wait();
@@ -221,7 +221,7 @@ public class WebSocketConnection implements WebSocket {
 		}
 
 		this.mSocket = mSocketThread.getSocket();
-		
+
 		if (mSocket == null) {
 			onClose(WebSocketCloseNotification.CANNOT_CONNECT, mSocketThread.getFailureMessage());
 		} else if (mSocket.isConnected()) {
@@ -241,7 +241,7 @@ public class WebSocketConnection implements WebSocket {
 
 	/**
 	 * Perform reconnection
-	 * 
+	 *
 	 * @return true if reconnection was scheduled
 	 */
 	protected boolean scheduleReconnect() {
@@ -268,7 +268,7 @@ public class WebSocketConnection implements WebSocket {
 
 	/**
 	 * Common close handler
-	 * 
+	 *
 	 * @param code       Close code.
 	 * @param reason     Close reason (human-readable).
 	 */
@@ -388,6 +388,12 @@ public class WebSocketConnection implements WebSocket {
 
 			mWebSocketWriter.forward(new WebSocketMessage.Close(WebSocketCloseCode.NORMAL));
 
+			if (webSocketObserver != null) {
+				webSocketObserver.onCloseMessage(close);
+			} else {
+				Log.d(TAG, "could not call onCloseMessage() .. handler already NULL");
+			}
+
 		} else if (message.obj instanceof WebSocketMessage.ServerHandshake) {
 			WebSocketMessage.ServerHandshake serverHandshake = (WebSocketMessage.ServerHandshake) message.obj;
 
@@ -433,14 +439,14 @@ public class WebSocketConnection implements WebSocket {
 
 		private Socket mSocket = null;
 		private String mFailureMessage = null;
-		
+
 		private Handler mHandler;
-		
+
 
 
 		public SocketThread(URI uri, WebSocketOptions options) {
 			this.setName(WS_CONNECTOR);
-			
+
 			this.mWebSocketURI = uri;
 		}
 
@@ -453,14 +459,14 @@ public class WebSocketConnection implements WebSocket {
 			synchronized (this) {
 				notifyAll();
 			}
-			
+
 			Looper.loop();
 			Log.d(TAG, "SocketThread exited.");
 		}
 
 
 
-		public void startConnection() {	
+		public void startConnection() {
 			try {
 				String host = mWebSocketURI.getHost();
 				int port = mWebSocketURI.getPort();
@@ -472,7 +478,7 @@ public class WebSocketConnection implements WebSocket {
 						port = 80;
 					}
 				}
-				
+
 				SocketFactory factory = null;
 				if (mWebSocketURI.getScheme().equalsIgnoreCase(WSS_URI_SCHEME)) {
 					factory = SSLCertificateSocketFactory.getDefault();
@@ -485,12 +491,12 @@ public class WebSocketConnection implements WebSocket {
 			} catch (IOException e) {
 				this.mFailureMessage = e.getLocalizedMessage();
 			}
-			
+
 			synchronized (this) {
 				notifyAll();
 			}
 		}
-		
+
 		public void stopConnection() {
 			try {
 				mSocket.close();
@@ -534,7 +540,7 @@ public class WebSocketConnection implements WebSocket {
 			}
 		}
 	}
-	
+
 	public static class MasterHandler extends Handler {
       public boolean mWriterHasData = false;
 
